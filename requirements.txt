@@ -5,3 +5,4 @@ gspread
 oauth2client
 numpy
 streamlit-autorefresh
+python-telegram-bot
