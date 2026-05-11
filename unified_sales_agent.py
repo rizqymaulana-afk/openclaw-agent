@@ -3,7 +3,15 @@
 from urllib import response
 
 import pandas as pd
-import ollama
+try:
+
+    import ollama
+
+    OLLAMA_AVAILABLE = True
+
+except:
+
+    OLLAMA_AVAILABLE = False
 from datetime import datetime
 
 from google_sheets_loader import (
@@ -617,6 +625,38 @@ FORMAT:
 
 ✅ Kesimpulan
 """
+
+        if not OLLAMA_AVAILABLE:
+
+            return f"""
+        📊 Daily Report - {today_date}
+
+        📌 Ringkasan Bisnis
+
+        Total revenue hari ini sebesar
+        {analysis['total_revenue']}
+        dengan total order
+        {analysis['total_orders']} transaksi.
+
+        Marketplace teratas:
+        {analysis['top_marketplace']}
+
+        Produk terlaris:
+        {analysis['top_product']}
+
+        📈 Insight Penting
+
+        {growth_analysis}
+
+        🔮 Forecast
+
+        {forecast_analysis}
+
+        ✅ Kesimpulan
+
+        Performa penjualan menunjukkan
+        tren yang positif dan stabil.
+        """
 
         response = ollama.chat(
             model="llama3",
