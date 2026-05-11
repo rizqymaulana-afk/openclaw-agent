@@ -1,27 +1,47 @@
 # google_sheets_loader.py
 
 import gspread
+import pandas as pd
+import streamlit as st
 
 from oauth2client.service_account import (
     ServiceAccountCredentials
 )
-
-import pandas as pd
 
 
 class GoogleSheetsLoader:
 
     def __init__(self):
 
+        # =========================
+        # GOOGLE API SCOPE
+        # =========================
+
         scope = [
             "https://spreadsheets.google.com/feeds",
             "https://www.googleapis.com/auth/drive"
         ]
 
-        creds = ServiceAccountCredentials.from_json_keyfile_name(
-            "credentials.json",
+        # =========================
+        # STREAMLIT SECRETS
+        # =========================
+
+        creds_dict = dict(
+            st.secrets["gcp_service_account"]
+        )
+
+        # =========================
+        # CREATE CREDENTIALS
+        # =========================
+
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(
+            creds_dict,
             scope
         )
+
+        # =========================
+        # AUTHORIZE CLIENT
+        # =========================
 
         self.client = gspread.authorize(
             creds
@@ -33,26 +53,42 @@ class GoogleSheetsLoader:
 
     def load_sheet(
         self,
-        spreadsheet_name,
+        spreadsheet_url,
         worksheet_name
     ):
 
         print(
-            f"\nLoading spreadsheet: {spreadsheet_name}"
+            f"\nLoading spreadsheet: {spreadsheet_url}"
         )
 
-        sheet = self.client.open_by_url(
-            spreadsheet_name
+        # =========================
+        # OPEN SPREADSHEET
+        # =========================
+
+        spreadsheet = self.client.open_by_url(
+            spreadsheet_url
         )
 
-        worksheet = sheet.worksheet(
+        # =========================
+        # OPEN WORKSHEET
+        # =========================
+
+        worksheet = spreadsheet.worksheet(
             worksheet_name
         )
 
-        data = worksheet.get_all_records()
+        # =========================
+        # GET DATA
+        # =========================
+
+        records = worksheet.get_all_records()
+
+        # =========================
+        # CONVERT TO DATAFRAME
+        # =========================
 
         df = pd.DataFrame(
-            data
+            records
         )
 
         print(
